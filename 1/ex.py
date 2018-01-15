@@ -44,8 +44,13 @@ def ex3():
     r2 = params.rvalue ** 2
     ystd = np.std(np.array(time), ddof=2)
     s = math.sqrt((ystd ** 2) * (1 - r2))
-    print(f'a: {round(params.intercept, 3)}, b: {round(params.slope, 3)}, r2: {round(r2, 3)}, s: {round(s, 3)}')
+    a = params.intercept
+    b = params.slope
+    print(f'a: {round(a, 3)}, b: {round(b, 3)}, r2: {round(r2, 3)}, s: {round(s, 3)}')
     print(f'About {round(r2 * 100)}% of the variance in winning time can be explained by the game number, so it is a reasonably good estimator')
+    last_game = int(max(time))
+    predictions = list(map(lambda x: round(b * x + a, 2), range(last_game + 1, last_game + 4)))
+    print(f'predictions for 2008, 2012, 2016 are: {predictions}, vs actual: 9.96, 9.63, 9.81')
 
     z = np.polyfit(games, time, 1)
     p = np.poly1d(z)
