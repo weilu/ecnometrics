@@ -67,10 +67,10 @@ def ex3():
 def plot_test(advert, sales):
     # a) scatter plot with linear fit
     z = np.polyfit(advert, sales, 1)
-    p = np.poly1d(z)
+    fn = np.poly1d(z)
     f, ax = plt.subplots()
     xp = np.linspace(min(advert), max(advert), 100)
-    ax.plot(advert, sales, '.', xp, p(xp), '-')
+    ax.plot(advert, sales, '.', xp, fn(xp), '-')
     ax.set_title('Advertising vs Sales')
     ax.set_xlabel('Advertising')
     ax.set_ylabel('Sales')
@@ -79,11 +79,22 @@ def plot_test(advert, sales):
     params = stats.linregress(advert, sales)
     t = params.slope / params.stderr
     print(f'a: {round(params.intercept, 3)}, b: {round(params.slope, 3)}, stderr: {round(params.stderr, 3)}, t: {round(t, 3)}')
+    print(f'95% confidence interval of b: {round(params.slope - 2 * params.stderr, 3)} and {round(params.slope + 2 * params.stderr, 3)}')
 
     # use sm to verify stderr & t-value results above
     model = sm.OLS(np.array(sales), sm.add_constant(advert))
     result = model.fit()
     print(result.summary())
+
+    # c) Compute the residuals and draw a histogram of these residuals.
+    # What conclusion do you draw from this histogram?
+    predicted_sales = fn(advert)
+    residuals = sales - predicted_sales
+    f, ax = plt.subplots()
+    ax.hist(residuals)
+    ax.set_title('Sales Residual Histogram')
+    ax.set_xlabel('Sales residual')
+    ax.set_ylabel('Frequency')
 
 def test():
     data = read_data("TestExer1.txt")
@@ -92,7 +103,6 @@ def test():
 
     plot_test(advert, sales)
 
-    # c) remove special week data point using interquarile range
     quartile1, quartile3 = np.percentile(sales, (25, 75))
     iqr = quartile3 - quartile1
     lower_bound = quartile1 - iqr * 1.5
@@ -104,7 +114,8 @@ def test():
     size_after = len(sales)
     print(f'Removed {size_before - size_after} outliers')
 
-    # e) after removal: a, b, standard error & t-value of b, b diff from 0?
+    # e) remove special week data point using interquartile range
+    # after removal: a, b, standard error & t-value of b, b diff from 0?
     plot_test(advert, sales)
 
     plt.show()
