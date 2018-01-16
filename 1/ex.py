@@ -103,6 +103,7 @@ def test():
 
     plot_test(advert, sales)
 
+    # e) remove special week data point using interquartile range
     quartile1, quartile3 = np.percentile(sales, (25, 75))
     iqr = quartile3 - quartile1
     lower_bound = quartile1 - iqr * 1.5
@@ -114,7 +115,6 @@ def test():
     size_after = len(sales)
     print(f'Removed {size_before - size_after} outliers')
 
-    # e) remove special week data point using interquartile range
     # after removal: a, b, standard error & t-value of b, b diff from 0?
     plot_test(advert, sales)
 
