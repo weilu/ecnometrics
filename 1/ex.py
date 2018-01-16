@@ -5,6 +5,7 @@ import numpy as np
 import os
 from scipy import stats
 import math
+import statsmodels.api as sm
 
 
 def read_data(infile):
@@ -63,9 +64,56 @@ def ex3():
     plt.show()
 
 
+def plot_test(advert, sales):
+    # a) scatter plot with linear fit
+    z = np.polyfit(advert, sales, 1)
+    p = np.poly1d(z)
+    f, ax = plt.subplots()
+    xp = np.linspace(min(advert), max(advert), 100)
+    ax.plot(advert, sales, '.', xp, p(xp), '-')
+    ax.set_title('Advertising vs Sales')
+    ax.set_xlabel('Advertising')
+    ax.set_ylabel('Sales')
+
+    # b) a, b, standard error(aka s) & t-value of b, b diff from 0?
+    params = stats.linregress(advert, sales)
+    t = params.slope / params.stderr
+    print(f'a: {round(params.intercept, 3)}, b: {round(params.slope, 3)}, stderr: {round(params.stderr, 3)}, t: {round(t, 3)}')
+
+    # use sm to verify stderr & t-value results above
+    model = sm.OLS(np.array(sales), sm.add_constant(advert))
+    result = model.fit()
+    print(result.summary())
+
+def test():
+    data = read_data("TestExer1.txt")
+    advert = data[:, 1]
+    sales = data[:, 2]
+
+    plot_test(advert, sales)
+
+    # c) remove special week data point using interquarile range
+    quartile1, quartile3 = np.percentile(sales, (25, 75))
+    iqr = quartile3 - quartile1
+    lower_bound = quartile1 - iqr * 1.5
+    upper_bound = quartile3 + iqr * 1.5
+    predicate = ((lower_bound < sales) & (upper_bound > sales))
+    size_before = len(sales)
+    advert = advert[predicate]
+    sales = sales[predicate]
+    size_after = len(sales)
+    print(f'Removed {size_before - size_after} outliers')
+
+    # e) after removal: a, b, standard error & t-value of b, b diff from 0?
+    plot_test(advert, sales)
+
+    plt.show()
+
+
 if __name__ == '__main__':
     file_path = os.path.dirname(__file__)
     os.chdir(file_path)
     # ex1()
-    ex3()
+    # ex3()
+    test()
 
